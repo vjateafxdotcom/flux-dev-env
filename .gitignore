@@ -1,0 +1,17 @@
+bin/
+lib/
+lib64/
+share/
+.venv/
+venv/
+.env
+*.bin
+*.safetensors
+*.pth
+*.ckpt
+*.onnx
+__pycache__/
+*.pyc
+.git/
+.ipynb_checkpoints/
+output/
