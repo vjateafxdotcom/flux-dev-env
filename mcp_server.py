@@ -173,6 +173,21 @@ async def inpaint_image(image_b64: str, prompt: str = "", mask_image_b64: Option
     await asyncio.to_thread(result.save, str(out_path))
     return {"output_path": str(out_path), "image_b64": _img_to_b64(result)}
 
+
+async def _run_with_timeout():
+    import uvicorn
+    from mcp.server.fastmcp import FastMCP
+    starlette_app = mcp.sse_app()
+    config = uvicorn.Config(
+        starlette_app,
+        host=mcp.settings.host,
+        port=mcp.settings.port,
+        log_level=mcp.settings.log_level.lower(),
+        timeout_keep_alive=1800,  # 30 minutes - image gen takes 5-10 min
+    )
+    server = uvicorn.Server(config)
+    await server.serve()
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8769)
@@ -181,4 +196,5 @@ if __name__ == "__main__":
     mcp.settings.host = args.host
     mcp.settings.port = args.port
     mcp.settings.transport_security = None
-    mcp.run(transport="sse")
+    # Use custom run with increased keepalive timeout
+    asyncio.run(_run_with_timeout())
